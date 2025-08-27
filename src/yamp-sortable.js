@@ -33,7 +33,7 @@ class YampSortable extends LitElement {
       
       .sortable-item.dragging {
         opacity: 0.5;
-        transform: scale(0.95);
+        /* transform: scale(0.95); */
         z-index: 1000;
       }
       
@@ -233,8 +233,10 @@ class YampSortable extends LitElement {
     this._ghostElement.innerHTML = `
       <div style="display: flex; align-items: center; gap: 8px; width: 100%;">
         <div style="width: 24px; height: 24px; background: var(--secondary-text-color); opacity: 0.3; border-radius: 4px;"></div>
-        <div style="flex: 1; height: 20px; background: var(--secondary-text-color); opacity: 0.3; border-radius: 4px;"></div>
-        <div style="width: 24px; height: 24px; background: var(--secondary-text-color); opacity: 0.3; border-radius: 4px;"></div>
+        <div style="flex: 1; display: flex;">
+          <div style="flex: 1; min-width: 0; height: 24px; background: var(--secondary-text-color); opacity: 0.3; border-radius: 4px;"></div>
+        </div>
+        <div style="width: 48px; height: 24px; background: var(--secondary-text-color); opacity: 0.3; border-radius: 4px;"></div>
       </div>
     `;
     
@@ -252,6 +254,15 @@ class YampSortable extends LitElement {
     if (!this._ghostElement || !this._draggedElement) return;
 
     const items = this._getSortableItems();
+    
+    // Hide ghost if over the last unsortable row
+    if (this._currentIndex >= items.length - 1) {
+      this._ghostElement.style.visibility = "hidden";
+      return;
+    }
+    
+    // Show ghost and position it
+    this._ghostElement.style.visibility = "visible";
     if (this._currentIndex >= 0 && this._currentIndex < items.length) {
       const targetItem = items[this._currentIndex];
       const rect = targetItem.getBoundingClientRect();

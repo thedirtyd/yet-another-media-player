@@ -216,36 +216,30 @@ class YetAnotherMediaPlayerEditor extends LitElement {
           opacity: 0.7;
           transition: opacity 0.2s ease;
         }
-        
         .handle:hover {
           opacity: 1;
         }
-        
         .handle:active {
           cursor: grabbing;
         }
-        
         .handle-disabled {
           opacity: 0.3;
           cursor: default;
           pointer-events: none;
         }
-        
         .handle-disabled:hover {
           opacity: 0.3;
         }
-        
+
         /* Sortable item styles */
         .sortable-item {
           transition: transform 0.2s ease;
         }
-        
         .sortable-item.dragging {
           opacity: 0.5;
-          transform: scale(0.95);
+          /* transform: scale(0.95); */
         }
-          padding-top: 3px;
-        }
+          
         .action-icon {
           align-self: flex-start;
           padding-top: 16px;
