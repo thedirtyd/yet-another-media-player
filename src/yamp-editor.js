@@ -228,12 +228,6 @@ class YetAnotherMediaPlayerEditor extends LitElement {
         .handle-disabled:hover {
           opacity: 0.3;
         }
-
-        /* Sortable item styles */
-        .sortable-item {
-          /* Remove transition to let SortableJS handle animations */
-        }
-          
         .action-icon {
           align-self: flex-start;
           padding-top: 16px;
@@ -360,7 +354,7 @@ class YetAnotherMediaPlayerEditor extends LitElement {
           <yamp-sortable @item-moved=${(e) => this._onEntityMoved(e)}>
             <div class="sortable-container">
               ${entities.map((ent, idx) => html`
-                <div class="entity-row-inner ${idx === entities.length - 1 ? 'sortable-item' : ''}" data-index="${idx}">
+                <div class="entity-row-inner ${idx < entities.length - 1 ? 'sortable-item' : ''}" data-index="${idx}">
                   <div class="handle ${idx === entities.length - 1 ? 'handle-disabled' : ''}">
                     <ha-icon icon="mdi:drag"></ha-icon>
                   </div>
