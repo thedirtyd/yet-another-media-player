@@ -19,6 +19,9 @@ class YampSortable extends LitElement {
       }
       .sortable-fallback {
         display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
       }
       .sortable-ghost {
         box-shadow: 0 0 0 2px var(--primary-color);
@@ -32,6 +35,14 @@ class YampSortable extends LitElement {
         background: var(--card-background-color);
         box-shadow: 0px 4px 8px 3px #00000026;
         cursor: grabbing;
+      }
+      /* Hide any fallback elements that might appear */
+      .sortable-fallback,
+      .sortable-fallback * {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
       }
     `;
   }
@@ -89,6 +100,17 @@ class YampSortable extends LitElement {
       animation: 150,
       draggable: this.draggableSelector,
       handle: this.handleSelector,
+      // Mobile-specific options to fix ghost issues
+      fallbackTolerance: 3,
+      fallbackOnBody: true,
+      fallbackClass: "sortable-fallback",
+      // Disable fallback on mobile to prevent ghost issues
+      fallback: false,
+      // Use transform instead of position for better mobile performance
+      setData: function (dataTransfer, dragEl) {
+        // Prevent default drag image
+        dataTransfer.setDragImage(dragEl, 0, 0);
+      },
       onChoose: this._handleChoose.bind(this),
       onStart: this._handleStart.bind(this),
       onEnd: this._handleEnd.bind(this),
@@ -110,6 +132,9 @@ class YampSortable extends LitElement {
   }
 
   _handleEnd(evt) {
+    // Clean up any remaining ghost elements
+    this._cleanupGhostElements();
+    
     // Put back in original location if needed
     if (evt.item.placeholder) {
       evt.item.placeholder.replaceWith(evt.item);
@@ -117,8 +142,9 @@ class YampSortable extends LitElement {
     }
   }
 
-  _handleStart() {
-    // Optional: emit drag start event
+  _handleStart(evt) {
+    // Ensure proper cleanup on start
+    this._cleanupGhostElements();
   }
 
   _handleChoose(evt) {
@@ -127,10 +153,22 @@ class YampSortable extends LitElement {
     evt.item.after(evt.item.placeholder);
   }
 
+  _cleanupGhostElements() {
+    // Remove any lingering ghost elements
+    const ghostElements = document.querySelectorAll('.sortable-fallback, .sortable-ghost');
+    ghostElements.forEach(el => {
+      if (el.parentNode) {
+        el.parentNode.removeChild(el);
+      }
+    });
+  }
+
   _destroySortable() {
     if (!this._sortable) return;
     this._sortable.destroy();
     this._sortable = null;
+    // Clean up any remaining ghost elements
+    this._cleanupGhostElements();
   }
 }
 

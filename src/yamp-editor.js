@@ -316,6 +316,28 @@ class YetAnotherMediaPlayerEditor extends LitElement {
           display: flex;
           justify-content: center;
         }
+        
+        /* Mobile-specific drag improvements */
+        @media (max-width: 768px) {
+          .sortable-item {
+            touch-action: pan-y;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+          }
+          .handle {
+            touch-action: manipulation;
+          }
+          /* Prevent text selection during drag on mobile */
+          .entity-row-inner,
+          .action-row-inner {
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+          }
+        }
       `;
     }
   
