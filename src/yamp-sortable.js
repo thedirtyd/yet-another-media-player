@@ -106,11 +106,7 @@ class YampSortable extends LitElement {
       fallbackClass: "sortable-fallback",
       // Disable fallback on mobile to prevent ghost issues
       fallback: false,
-      // Use transform instead of position for better mobile performance
-      setData: function (dataTransfer, dragEl) {
-        // Prevent default drag image
-        dataTransfer.setDragImage(dragEl, 0, 0);
-      },
+
       onChoose: this._handleChoose.bind(this),
       onStart: this._handleStart.bind(this),
       onEnd: this._handleEnd.bind(this),
