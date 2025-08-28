@@ -36,7 +36,7 @@ class YampSortable extends LitElement {
         box-shadow: 0px 4px 8px 3px #00000026;
         cursor: grabbing;
       }
-      /* Hide any fallback elements that might appear */
+      /* Hide any fallback elements that might appear (mobile fix)*/
       .sortable-fallback,
       .sortable-fallback * {
         display: none !important;
