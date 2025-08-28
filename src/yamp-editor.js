@@ -233,11 +233,7 @@ class YetAnotherMediaPlayerEditor extends LitElement {
 
         /* Sortable item styles */
         .sortable-item {
-          transition: transform 0.2s ease;
-        }
-        .sortable-item.dragging {
-          opacity: 0.5;
-          /* transform: scale(0.95); */
+          /* Remove transition to let SortableJS handle animations */
         }
           
         .action-icon {
@@ -359,52 +355,54 @@ class YetAnotherMediaPlayerEditor extends LitElement {
           <yamp-sortable 
             @item-moved=${(e) => this._onEntityMoved(e)}
           >
-            ${entities.map((ent, idx) => html`
-              <div class="entity-row-inner sortable-item" data-index="${idx}">
-                <div class="handle ${idx === entities.length - 1 ? 'handle-disabled' : ''}">
-                  <ha-icon icon="mdi:drag"></ha-icon>
+            <div class="sortable-container">
+              ${entities.map((ent, idx) => html`
+                <div class="entity-row-inner sortable-item" data-index="${idx}">
+                  <div class="handle ${idx === entities.length - 1 ? 'handle-disabled' : ''}">
+                    <ha-icon icon="mdi:drag"></ha-icon>
+                  </div>
+                  <div class="grow-children">
+                    ${ 
+                    /* ha-entity-picker will show "[Object object]" for entities with extra properties,
+                       so we'll get around that by using ha-selector. However ha-selector always renders 
+                       as a required field for some reason. This is confusing for the last entity picker, 
+                       used to add a new entity, which is always blank and not required. So for the last
+                       last entity only, we'll use ha-entity-picker. This entity will never have extra
+                       properties, because as soon as it's populated, a new blank entity is added below it
+                    */
+                    idx === entities.length - 1 && !ent.entity_id
+                      ? html`
+                          <ha-entity-picker
+                            .hass=${this.hass}
+                            .value=${ent.entity_id}
+                            .includeDomains=${["media_player"]}
+                            .excludeEntities=${this._config.entities?.map(e => e.entity_id) ?? []}
+                            clearable
+                            @value-changed=${e => this._onEntityChanged(idx, e.detail.value)}
+                          ></ha-entity-picker>
+                        `
+                      : html`
+                          <ha-selector
+                            .hass=${this.hass}
+                            .selector=${{ entity: { domain: "media_player" } }}
+                            .value=${ent.entity_id}
+                            clearable
+                            @value-changed=${e => this._onEntityChanged(idx, e.detail.value)}
+                          ></ha-selector>
+                        `
+                  }
+                  </div>
+                  <div class="entity-row-actions">
+                    <ha-icon
+                      class="icon-button ${!ent.entity_id ? "icon-button-disabled" : ""}"
+                      icon="mdi:pencil"
+                      title="Edit Entity Settings"
+                      @click=${() => this._onEditEntity(idx)}
+                    ></ha-icon>
+                  </div>
                 </div>
-                <div class="grow-children">
-                  ${ 
-                  /* ha-entity-picker will show "[Object object]" for entities with extra properties,
-                     so we'll get around that by using ha-selector. However ha-selector always renders 
-                     as a required field for some reason. This is confusing for the last entity picker, 
-                     used to add a new entity, which is always blank and not required. So for the last
-                     last entity only, we'll use ha-entity-picker. This entity will never have extra
-                     properties, because as soon as it's populated, a new blank entity is added below it
-                  */
-                  idx === entities.length - 1 && !ent.entity_id
-                    ? html`
-                        <ha-entity-picker
-                          .hass=${this.hass}
-                          .value=${ent.entity_id}
-                          .includeDomains=${["media_player"]}
-                          .excludeEntities=${this._config.entities?.map(e => e.entity_id) ?? []}
-                          clearable
-                          @value-changed=${e => this._onEntityChanged(idx, e.detail.value)}
-                        ></ha-entity-picker>
-                      `
-                    : html`
-                        <ha-selector
-                          .hass=${this.hass}
-                          .selector=${{ entity: { domain: "media_player" } }}
-                          .value=${ent.entity_id}
-                          clearable
-                          @value-changed=${e => this._onEntityChanged(idx, e.detail.value)}
-                        ></ha-selector>
-                      `
-                }
-                </div>
-                <div class="entity-row-actions">
-                  <ha-icon
-                    class="icon-button ${!ent.entity_id ? "icon-button-disabled" : ""}"
-                    icon="mdi:pencil"
-                    title="Edit Entity Settings"
-                    @click=${() => this._onEditEntity(idx)}
-                  ></ha-icon>
-                </div>
-              </div>
-            `)}
+              `)}
+            </div>
           </yamp-sortable>
         </div>
   
