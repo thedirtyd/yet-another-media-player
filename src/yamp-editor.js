@@ -13,7 +13,6 @@ class YetAnotherMediaPlayerEditor extends LitElement {
         _config: {},
         _entityEditorIndex: { type: Number },
         _actionEditorIndex: { type: Number },
-        _actionMoveMode: { type: Boolean },
         _actionMode: { type: String },
         _useTemplate: { type: Boolean },
         _useVolTemplate: { type: Boolean },
@@ -24,7 +23,6 @@ class YetAnotherMediaPlayerEditor extends LitElement {
       super();
       this._entityEditorIndex = null;
       this._actionEditorIndex = null;
-      this._actionMoveMode = false;
 
       this._yamlDraft = "";
       this._parsedYaml = null;
@@ -239,6 +237,13 @@ class YetAnotherMediaPlayerEditor extends LitElement {
         .action-icon {
           align-self: flex-start;
           padding-top: 16px;
+        }
+        .action-handle {
+          align-self: flex-start;
+          padding-top: 18px;
+        }
+        .action-row-actions {
+          padding-top: 2px;
         }
         .service-data-editor-header {
           display: flex;
@@ -567,83 +572,55 @@ class YetAnotherMediaPlayerEditor extends LitElement {
             <div class="action-group-title">
               Actions
             </div>
-            <div class="action-group-actions">
-              <ha-icon
-                class="icon-button"
-                icon=${this._actionMoveMode ? "mdi:pencil" : "mdi:swap-vertical"}
-                title=${this._actionMoveMode ? "Back to Edit Mode" : "Enable Move Mode"}
-                @mousedown=${(e) => e.preventDefault()}
-                @click=${(e) => {
-                  this._toggleActionMoveMode();
-                  e.currentTarget.blur();
-                }}
-              ></ha-icon>
-            </div>
           </div>
-          ${actions.map((act, idx) => html`
-            <div class="action-row-inner">
-              ${act?.icon ? html`
-                <ha-icon 
-                class="action-icon"
-                icon="${act?.icon}"></ha-icon>
-              ` : html`
-                <span class="action-icon-placeholder"></span>
-              `
-              }
-              <div class="grow-children">
-                <ha-textfield
-                  placeholder="(Icon Only)"
-                  .value=${act?.name ?? ""}
-                  helper="${
-                    act?.menu_item
-                    ? `Open Menu Item: ${act?.menu_item}`
-                    : act?.service 
-                    ? `Call Service: ${act?.service}`
-                    : `Not Configured`
-                  }"
-                  .helperPersistent=${true}
-                  @input=${a => this._onActionChanged(idx, a.target.value)}
-                ></ha-textfield>
-              </div>
-              <div class="action-row-actions">
-               ${!this._actionMoveMode ? html`
-                <ha-icon
-                  class="icon-button"
-                  icon="mdi:pencil"
-                  title="Edit Action Settings"
-                  @click=${() => this._onEditAction(idx)}
-                ></ha-icon>
-                <ha-icon
-                  class="icon-button"
-                  icon="mdi:trash-can"
-                  title="Delete Action"
-                  @click=${() => this._removeAction(idx)}
-                ></ha-icon>
-              ` : html`
-                <ha-icon
-                  class="icon-button ${idx === 0 ? "icon-button-disabled" : ""}"
-                  icon="mdi:arrow-up"
-                  title="Move Up"
-                  @mousedown=${(e) => e.preventDefault()}
-                  @click=${(e) => {
-                    this._moveAction(idx, -1);
-                    e.currentTarget.blur();
-                  }}
-                ></ha-icon>
-                <ha-icon
-                  class="icon-button ${idx >= actions.length - 1 ? "icon-button-disabled" : ""}"
-                  icon="mdi:arrow-down"
-                  title="Move Down"
-                  @mousedown=${(e) => e.preventDefault()}
-                  @click=${(e) => {
-                    this._moveAction(idx, 1);
-                    e.currentTarget.blur();
-                  }}
-                ></ha-icon>
-                `}
-              </div>
+          <yamp-sortable @item-moved=${(e) => this._onActionMoved(e)}>
+            <div class="sortable-container">
+              ${actions.map((act, idx) => html`
+                <div class="action-row-inner sortable-item">
+                  <div class="handle action-handle">
+                    <ha-icon icon="mdi:drag"></ha-icon>
+                  </div>
+                  ${act?.icon ? html`
+                    <ha-icon 
+                    class="action-icon"
+                    icon="${act?.icon}"></ha-icon>
+                  ` : html`
+                    <span class="action-icon-placeholder"></span>
+                  `
+                  }
+                  <div class="grow-children">
+                    <ha-textfield
+                      placeholder="(Icon Only)"
+                      .value=${act?.name ?? ""}
+                      helper="${
+                        act?.menu_item
+                        ? `Open Menu Item: ${act?.menu_item}`
+                        : act?.service 
+                        ? `Call Service: ${act?.service}`
+                        : `Not Configured`
+                      }"
+                      .helperPersistent=${true}
+                      @input=${a => this._onActionChanged(idx, a.target.value)}
+                    ></ha-textfield>
+                  </div>
+                  <div class="action-row-actions">
+                    <ha-icon
+                      class="icon-button"
+                      icon="mdi:pencil"
+                      title="Edit Action Settings"
+                      @click=${() => this._onEditAction(idx)}
+                    ></ha-icon>
+                    <ha-icon
+                      class="icon-button"
+                      icon="mdi:trash-can"
+                      title="Delete Action"
+                      @click=${() => this._removeAction(idx)}
+                    ></ha-icon>
+                  </div>
+                </div>
+              `)}
             </div>
-          `)}
+          </yamp-sortable>
           <div class="add-action-button-wrapper">
             <ha-icon
               class="icon-button"
@@ -1115,9 +1092,7 @@ ${ (this._useTemplate ?? this._looksLikeTemplate(entity?.music_assistant_entity)
       this._actionEditorIndex = null;
     }
 
-    _toggleActionMoveMode() {
-      this._actionMoveMode = !this._actionMoveMode;
-    }
+
 
     _onEntityMoved(event) {
       const { oldIndex, newIndex } = event.detail;
@@ -1133,20 +1108,22 @@ ${ (this._useTemplate ?? this._looksLikeTemplate(entity?.music_assistant_entity)
       
       this._updateConfig("entities", entities);
     }
-    
-    _moveAction(idx, offset) {
+
+    _onActionMoved(event) {
+      const { oldIndex, newIndex } = event.detail;
       const actions = [...this._config.actions];
-      const newIndex = idx + offset;
-    
-      if (newIndex < 0 || newIndex >= actions.length) {
+      
+      if (oldIndex >= actions.length || newIndex >= actions.length) {
         return;
       }
-    
-      const [moved] = actions.splice(idx, 1);
+      
+      const [moved] = actions.splice(oldIndex, 1);
       actions.splice(newIndex, 0, moved);
-    
+      
       this._updateConfig("actions", actions);
     }
+    
+
 
     _removeAction(index) {
       const actions = [...(this._config.actions ?? [])];

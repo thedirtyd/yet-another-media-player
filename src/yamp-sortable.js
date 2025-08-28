@@ -133,12 +133,15 @@ class YampSortable extends LitElement {
   }
 
   _handleMove(evt) {
-    // Prevent dropping in the last position (the "new entity" row)
-    const items = this.querySelectorAll(this.draggableSelector);
-    const lastIndex = items.length - 1;
-    
-    if (evt.related === items[lastIndex] || evt.willInsertAfter && evt.newIndex === lastIndex) {
-      return false; // Prevent the move
+    // Only prevent dropping in the last position if there are disabled handles
+    const disabledHandles = this.querySelectorAll('.handle-disabled');
+    if (disabledHandles.length > 0) {
+      const items = this.querySelectorAll(this.draggableSelector);
+      const lastIndex = items.length - 1;
+      
+      if (evt.related === items[lastIndex] || evt.willInsertAfter && evt.newIndex === lastIndex) {
+        return false; // Prevent the move
+      }
     }
     
     return true; // Allow the move
