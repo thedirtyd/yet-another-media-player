@@ -17,18 +17,15 @@ class YampSortable extends LitElement {
       :host {
         display: block;
       }
-      
       .sortable-fallback {
         display: none !important;
       }
-
       .sortable-ghost {
         box-shadow: 0 0 0 2px var(--primary-color);
         background: rgba(var(--rgb-primary-color), 0.25);
         border-radius: 4px;
         opacity: 0.4;
       }
-
       .sortable-drag {
         border-radius: 4px;
         opacity: 1;
@@ -92,12 +89,10 @@ class YampSortable extends LitElement {
       animation: 150,
       draggable: this.draggableSelector,
       handle: this.handleSelector,
-      filter: ".handle-disabled",
       onChoose: this._handleChoose.bind(this),
       onStart: this._handleStart.bind(this),
       onEnd: this._handleEnd.bind(this),
       onUpdate: this._handleUpdate.bind(this),
-      onMove: this._handleMove.bind(this),
     };
 
     this._sortable = new Sortable(container, options);
@@ -130,21 +125,6 @@ class YampSortable extends LitElement {
     // Create placeholder to maintain layout
     evt.item.placeholder = document.createComment("sort-placeholder");
     evt.item.after(evt.item.placeholder);
-  }
-
-  _handleMove(evt) {
-    // Only prevent dropping in the last position if there are disabled handles
-    const disabledHandles = this.querySelectorAll('.handle-disabled');
-    if (disabledHandles.length > 0) {
-      const items = this.querySelectorAll(this.draggableSelector);
-      const lastIndex = items.length - 1;
-      
-      if (evt.related === items[lastIndex] || evt.willInsertAfter && evt.newIndex === lastIndex) {
-        return false; // Prevent the move
-      }
-    }
-    
-    return true; // Allow the move
   }
 
   _destroySortable() {

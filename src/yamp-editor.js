@@ -357,12 +357,10 @@ class YetAnotherMediaPlayerEditor extends LitElement {
               Entities*
             </div>
           </div>
-          <yamp-sortable 
-            @item-moved=${(e) => this._onEntityMoved(e)}
-          >
+          <yamp-sortable @item-moved=${(e) => this._onEntityMoved(e)}>
             <div class="sortable-container">
               ${entities.map((ent, idx) => html`
-                <div class="entity-row-inner sortable-item" data-index="${idx}">
+                <div class="entity-row-inner ${idx === entities.length - 1 ? 'sortable-item' : ''}" data-index="${idx}">
                   <div class="handle ${idx === entities.length - 1 ? 'handle-disabled' : ''}">
                     <ha-icon icon="mdi:drag"></ha-icon>
                   </div>
@@ -567,7 +565,7 @@ class YetAnotherMediaPlayerEditor extends LitElement {
           ></ha-entity-picker>
         </div>
 
-         <div class="form-row action-group">
+        <div class="form-row action-group">
           <div class="action-group-header">
             <div class="action-group-title">
               Actions
